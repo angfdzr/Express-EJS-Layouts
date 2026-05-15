@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>
+        <%= title || 'Login' %>
+    </title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --card: #fff;
+            --accent: #4f46e5;
+            --muted: #6b7280
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, Segoe UI, Roboto, Arial;
+            background: var(--bg);
+            color: #111
+        }
+
+        .wrap {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px
+        }
+
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            padding: 28px
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 20px
+        }
+
+        p.lead {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            margin-top: 12px;
+            color: #374151
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-size: 14px
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px
+        }
+
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .alt {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .social {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px
+        }
+
+        .social button {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #e6e7ef;
+            color: #111;
+            padding: 8px;
+            border-radius: 8px
+        }
+
+        .foot {
+            margin-top: 16px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .error {
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>Sign in</h1>
+            <p class="lead">Masuk ke akun Anda untuk melanjutkan.</p>
+
+            <% if (typeof message !=='undefined' && message) { %>
+                <div class="error">
+                    <%= message %>
+                </div>
+                <% } %>
+
+                    <form method="post" action="/login" novalidate>
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="you@domain.com" required>
+
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="••••••••" required>
+
+                        <div class="actions">
+                            <div class="alt"><a href="/register">Belum punya akun?</a></div>
+                            <button type="submit">Masuk</button>
+                        </div>
+                    </form>
+                    <div class="foot">Dengan masuk Anda menyetujui syarat & kebijakan kami.</div>
+        </div>
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful',
+                        text: data.message,
+                        showConfirmButton: true
+                    }).then(() => {
+                        window.location.href = '/dashboard';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Login Failed',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'An error occurred',
+                    text: 'Please try again later.'
+                });
+            });
+    });
+</script>
+
+</html>

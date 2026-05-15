@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>
+        <%= title || 'Register' %>
+    </title>
+    <style>
+        :root {
+            --bg: #f6f8fb;
+            --card: #fff;
+            --accent: #059669;
+            --muted: #6b7280
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, Segoe UI, Roboto, Arial;
+            background: var(--bg);
+            color: #111
+        }
+
+        .wrap {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px
+        }
+
+        .card {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            padding: 28px
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 20px
+        }
+
+        p.lead {
+            margin: 0 0 18px;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        .row {
+            display: flex;
+            gap: 12px
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-size: 14px
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            margin-top: 12px;
+            color: #374151
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px
+        }
+
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .foot {
+            margin-top: 16px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .error {
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>Create account</h1>
+            <p class="lead">Buat akun baru untuk mengakses fitur.</p>
+
+            <% if (typeof message !=='undefined' && message) { %>
+                <div class="error">
+                    <%= message %>
+                </div>
+                <% } %>
+
+                    <form method="post" action="/register" novalidate>
+                        <div class="row">
+                            <div style="flex:1">
+                                <label for="username">Username</label>
+                                <input id="username" name="username" type="text" placeholder="username" required>
+                            </div>
+                            <div style="flex:1">
+                                <label for="email">Email</label>
+                                <input id="email" name="email" type="email" placeholder="you@domain.com" required>
+                            </div>
+                        </div>
+
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="Minimal 8 karakter" required>
+
+                        <div class="actions">
+                            <div class="alt"><a href="/login">Sudah punya akun?</a></div>
+                            <button type="submit">Daftar</button>
+                        </div>
+                    </form>
+
+                    <div class="foot">Dengan mendaftar Anda menyetujui syarat & kebijakan kami.</div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.querySelector('form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, username, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      Swal.fire({ title: 'Registration Successful', text: data.message, icon: 'success' })
+        .then(() => { window.location.href = '/login'; });
+      return;
+    }
+
+    // handle validation errors (array) or message
+    if (data.errors && Array.isArray(data.errors)) {
+      const msg = data.errors.map(e => e.msg || e.msg).join('\n');
+      Swal.fire({ title: 'Validation Error', text: msg, icon: 'error' });
+    } else {
+      Swal.fire({ title: 'Registration Failed', text: data.message || 'Unknown error', icon: 'error' });
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire({ title: 'Error', text: 'An error occurred during registration.', icon: 'error' });
+  }
+});
+</script>
